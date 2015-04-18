@@ -52,7 +52,8 @@ module AwsRestServer
       content_type :json
       {
         services: [
-          "users"
+          "users",
+          "groups",
         ]
       }.to_json
     end
@@ -81,6 +82,37 @@ module AwsRestServer
         end
         {
           Users: users
+        }.to_json
+      rescue => error
+        p error
+        return {}.to_json
+      end
+    end
+
+    get '/aws/iam/groups' do
+      content_type :json
+
+      # '/aws/iam/groups?test=1'
+      if params['test'] == "1" then
+        return erb :'aws/iam/groups/groups_dummy'
+      end
+
+      begin
+        client = Aws::IAM::Client.new
+        resource = Aws::IAM::Resource.new(client: client)
+        groups_obj = resource.groups
+        groups = []
+        groups_obj.each do |groups_obj|
+          groups.push({
+            GroupName: groups_obj.name,
+            Path: groups_obj.path,
+            CreateDate: groups_obj.create_date,
+            GroupId: groups_obj.group_id,
+            Arn: groups_obj.arn
+          })
+        end
+        {
+          Groups: groups
         }.to_json
       rescue => error
         p error
