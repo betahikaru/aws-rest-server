@@ -52,7 +52,8 @@ module AwsRestServer
       content_type :json
       {
         services: [
-          "users"
+          "users",
+          "groups",
         ]
       }.to_json
     end
