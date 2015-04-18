@@ -1,0 +1,6 @@
+# for Dotenv
+.env
+
+# for ruby
+/.bundle
+/vendor
