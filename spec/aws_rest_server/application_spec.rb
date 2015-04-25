@@ -18,6 +18,8 @@ describe AwsRestServer::Application do
     /aws/iam/users?test=1
     /aws/iam/groups
     /aws/iam/groups?test=1
+    /aws/iam/account_summary
+    /aws/iam/account_summary?test=1
     }.each do |uri|
     describe "Exists '#{uri}' page" do
       it "return 200 OK" do
