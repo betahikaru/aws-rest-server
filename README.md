@@ -69,6 +69,9 @@ WARN: aws-rest-server allows all request with any key and secret.
 - List IAM Groups.
   - ```/aws/iam/groups```
   - ```/aws/iam/groups?test=1```
+- IAM entity usage and IAM quotas.
+  - ```/aws/iam/account_summary```
+  - ```/aws/iam/account_summary?test=1```
 
 ## Licence
 MIT

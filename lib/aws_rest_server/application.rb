@@ -120,5 +120,24 @@ module AwsRestServer
       end
     end
 
+    get '/aws/iam/account_summary' do
+      content_type :json
+
+      # '/aws/iam/account_summary?test=1'
+      if params['test'] == "1" then
+        return erb :'aws/iam/account_summary/account_summary_dummy'
+      end
+
+      begin
+        client = Aws::IAM::Client.new
+        resource = Aws::IAM::Resource.new(client: client)
+        summary_obj = resource.account_summary.summary_map
+        summary_obj.to_json
+      rescue => error
+        p error
+        return {}.to_json
+      end
+    end
+
   end
 end
