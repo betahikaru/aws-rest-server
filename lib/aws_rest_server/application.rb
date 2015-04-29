@@ -89,6 +89,58 @@ module AwsRestServer
       end
     end
 
+    get '/aws/iam/users/:user_name/groups' do
+      content_type :json
+
+      if params['test'] == "1" then
+        return {
+          UserName: params[:user_name],
+          Groups: [],
+        }.to_json # TODO: erb :'aws/iam/users/test_user/groups'
+      end
+
+      begin
+        # Request
+        client = Aws::IAM::Client.new
+        resource = Aws::IAM::Resource.new(client: client)
+        user_obj = resource.user(params[:user_name])
+        groups_obj = user_obj.groups
+
+        # Format
+        groups = []
+        groups_obj.each do |groups_obj|
+          groups.push({
+            GroupName: groups_obj.name,
+            Path: groups_obj.path,
+            CreateDate: groups_obj.create_date,
+            GroupId: groups_obj.group_id,
+            Arn: groups_obj.arn
+          })
+        end
+
+        # Responce
+        {
+          UserName: user_obj.name,
+          Groups: groups,
+        }.to_json
+      rescue Aws::IAM::Errors::NoSuchEntity => nosuch_error
+        # Not found user specified by 'user_name'
+        p nosuch_error
+        status 404
+        return {
+          UserName: params[:user_name],
+          Exception: nosuch_error.to_json
+        }.to_json
+      rescue => error
+        p error
+        status 500
+        return {
+          UserName: params[:user_name],
+          Exception: error.to_json
+        }.to_json
+      end
+    end
+
     get '/aws/iam/groups' do
       content_type :json
 

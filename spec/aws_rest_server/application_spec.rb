@@ -16,6 +16,7 @@ describe AwsRestServer::Application do
     /aws/iam
     /aws/iam/users
     /aws/iam/users?test=1
+    /aws/iam/users/user_name/groups?test=1
     /aws/iam/groups
     /aws/iam/groups?test=1
     /aws/iam/account_summary
@@ -25,6 +26,17 @@ describe AwsRestServer::Application do
       it "return 200 OK" do
         get uri
         expect(last_response).to be_ok
+      end
+    end
+  end
+
+  %w{
+    /aws/iam/users/user_name_not_exists/groups
+    }.each do |uri|
+    describe "Not Exists '#{uri}' page" do
+      it "return 404 Not Found" do
+        get uri
+        expect(last_response).to be_not_found
       end
     end
   end
