@@ -24,8 +24,16 @@ describe AwsRestServer::Application do
     }.each do |uri|
     describe "Exists '#{uri}' page" do
       it "return 200 OK" do
+        basic_authorize(ENV['BASIC_AUTH_USERNAME'], ENV['BASIC_AUTH_PASSWORD'])
         get uri
         expect(last_response).to be_ok
+      end
+    end
+
+    describe "Without Authorization, exists '#{uri}' page" do
+      it "return 401 Unauthorized (without Authorization: in header)" do
+        get uri
+        expect(last_response).to be_unauthorized
       end
     end
   end
@@ -35,8 +43,16 @@ describe AwsRestServer::Application do
     }.each do |uri|
     describe "Not Exists '#{uri}' page" do
       it "return 404 Not Found" do
+        basic_authorize(ENV['BASIC_AUTH_USERNAME'], ENV['BASIC_AUTH_PASSWORD'])
         get uri
         expect(last_response).to be_not_found
+      end
+    end
+
+    describe "Without Authorization, not exists '#{uri}' page" do
+      it "return 401 Unauthorized (without Authorization: in header)" do
+        get uri
+        expect(last_response).to be_unauthorized
       end
     end
   end
