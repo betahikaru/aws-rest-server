@@ -41,23 +41,32 @@ Server has sample data. Show folloing command.
 
 ## Setting
 
-### IAM User
-If you want to show Real data, set up access-key and secret and restart server.
-
-
+First, copy ```.env.sample``` to ```.env```.
 ```shell
 cp .env.sample .env
 vi .env
+```
+
+### IAM User
+If you want to show Real data, set up access-key and secret and restart server.
+Edit ```.env```.
+
+```shell
 AWS_ACCESS_KEY_ID=<Your access key>
 AWS_SECRET_ACCESS_KEY=<Your secret access key>
 AWS_REGION=ap-northeast-1
+```
+
+### Authentication
+aws-rest-server uses BasicAuth for all request.
+Edit ```.env``` to set username and password.
+
+```
 BASIC_AUTH_USERNAME=<User name for BasicAuth>
 BASIC_AUTH_PASSWORD=<Password for BasicAuth>
 ```
 
-### Authentication
-- BasicAuth for all request
-- Don't support OAuth and other one yet.
+And, don't support OAuth and other one yet.
 
 ## Usage
 
