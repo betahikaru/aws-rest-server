@@ -7,8 +7,11 @@ require 'sinatra'
 require 'rspec'
 require 'rack/test'
 require 'aws-sdk-core'
+require 'dotenv'
 
 set :environment, :test
 set :run, false
 set :raise_errors, true
 set :logging, false
+
+Dotenv.load

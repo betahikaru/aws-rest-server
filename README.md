@@ -51,11 +51,13 @@ vi .env
 AWS_ACCESS_KEY_ID=<Your access key>
 AWS_SECRET_ACCESS_KEY=<Your secret access key>
 AWS_REGION=ap-northeast-1
+BASIC_AUTH_USERNAME=<User name for BasicAuth>
+BASIC_AUTH_PASSWORD=<Password for BasicAuth>
 ```
 
-### Authentication (TODO)
-WARN: aws-rest-server allows all request with any key and secret.
-
+### Authentication
+- BasicAuth for all request
+- Don't support OAuth and other one yet.
 
 ## Usage
 
