@@ -27,12 +27,38 @@ module AwsRestServer
     set :root, File.join(File.dirname(__FILE__), "..", "..")
     set :views, Proc.new { File.join(root, "views") }
 
+    # setting for session
+    enable :sessions
+
     # dotenv
     Dotenv.load
 
     # Basic Auth
     use Rack::Auth::Basic do |username, password|
       username == ENV['BASIC_AUTH_USERNAME'] && password == ENV['BASIC_AUTH_PASSWORD']
+    end
+
+    helpers do
+      def aws_iam_client()
+        credentials = Aws::Credentials.new(
+          session['AWS_ACCESS_KEY_ID'],
+          session['AWS_SECRET_ACCESS_KEY']
+        )
+        client = Aws::IAM::Client.new(
+          region: ENV['AWS_REGION'],
+          credentials: credentials
+        )
+      end
+    end
+
+    post '/aws/setting' do
+      key = URI.unescape(params[:AWS_ACCESS_KEY_ID])
+      secret = URI.unescape(params[:AWS_SECRET_ACCESS_KEY])
+      session['AWS_ACCESS_KEY_ID'] = key
+      session['AWS_SECRET_ACCESS_KEY'] = secret
+      {
+        Result: "Updated"
+      }.to_json
     end
 
     get '/' do
@@ -72,7 +98,7 @@ module AwsRestServer
       end
 
       begin
-        client = Aws::IAM::Client.new
+        client = aws_iam_client()
         resource = Aws::IAM::Resource.new(client: client)
         users_obj = resource.users
         users = []
@@ -88,9 +114,21 @@ module AwsRestServer
         {
           Users: users
         }.to_json
+      rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
+        p error
+        return {
+          Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
+      rescue Aws::Errors::MissingCredentialsError => error
+        p error
+        return {
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
       rescue => error
         p error
-        return {}.to_json
+        return {
+          Error: "Internal error"
+        }.to_json
       end
     end
 
@@ -106,7 +144,7 @@ module AwsRestServer
 
       begin
         # Request
-        client = Aws::IAM::Client.new
+        client = aws_iam_client()
         resource = Aws::IAM::Resource.new(client: client)
         user_obj = resource.user(params[:user_name])
         groups_obj = user_obj.groups
@@ -155,7 +193,7 @@ module AwsRestServer
       end
 
       begin
-        client = Aws::IAM::Client.new
+        client = aws_iam_client()
         resource = Aws::IAM::Resource.new(client: client)
         groups_obj = resource.groups
         groups = []
@@ -186,7 +224,7 @@ module AwsRestServer
       end
 
       begin
-        client = Aws::IAM::Client.new
+        client = aws_iam_client()
         resource = Aws::IAM::Resource.new(client: client)
         summary_obj = resource.account_summary.summary_map
         summary_obj.to_json
