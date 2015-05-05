@@ -24,7 +24,7 @@ Server will response json. Content-Type is "application/json".
 Server has sample data. Show folloing command.
 
 ```shell
-% curl "http://localhost:9292/aws/iam/users?test=1"
+% curl -u user:changeme "http://localhost:9292/aws/iam/users?test=1"
 {
     "Users": [
         {
@@ -38,6 +38,8 @@ Server has sample data. Show folloing command.
     ]
 }
 ```
+
+> All page needs BasicAuth. username is "user", passoword is "changeme" by default. If you want to change those, show #Authentication topic.
 
 ## Setting
 
