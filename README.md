@@ -50,10 +50,12 @@ vi .env
 ```
 
 ### AWS API Setting
-Set up region and restart server.
+Set up region and restart server. aws-rest-server uses AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to run spec.
 Edit ```.env```.
 
 ```shell
+AWS_ACCESS_KEY_ID=<Your API Key encoded for URI>
+AWS_SECRET_ACCESS_KEY=<Your API Key encoded for URI>
 AWS_REGION=ap-northeast-1
 ```
 
@@ -70,6 +72,7 @@ And, don't support OAuth and other one yet.
 
 ## Usage
 
+### Use by cUrl
 After setting, execute following command.
 
 ```shell
