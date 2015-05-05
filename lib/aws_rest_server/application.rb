@@ -116,16 +116,19 @@ module AwsRestServer
         }.to_json
       rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
         p error
+        status 500
         return {
           Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
         }.to_json
       rescue Aws::Errors::MissingCredentialsError => error
         p error
+        status 500
         return {
-          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key.\n(" + error.code + ")"
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key."
         }.to_json
       rescue => error
         p error
+        status 500
         return {
           Error: "Internal error"
         }.to_json
@@ -166,20 +169,33 @@ module AwsRestServer
           UserName: user_obj.name,
           Groups: groups,
         }.to_json
+      rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
+      rescue Aws::Errors::MissingCredentialsError => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key."
+        }.to_json
       rescue Aws::IAM::Errors::NoSuchEntity => nosuch_error
         # Not found user specified by 'user_name'
         p nosuch_error
         status 404
         return {
           UserName: params[:user_name],
-          Exception: nosuch_error.to_json
+          Error: nosuch_error.to_json
         }.to_json
       rescue => error
         p error
         status 500
         return {
           UserName: params[:user_name],
-          Exception: error.to_json
+          Error: "Internal error",
+          ErrorDetail: error.to_json
         }.to_json
       end
     end
@@ -209,9 +225,24 @@ module AwsRestServer
         {
           Groups: groups
         }.to_json
+      rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
+      rescue Aws::Errors::MissingCredentialsError => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key."
+        }.to_json
       rescue => error
         p error
-        return {}.to_json
+        status 500
+        return {
+          Error: "Internal error"
+        }.to_json
       end
     end
 
@@ -228,9 +259,24 @@ module AwsRestServer
         resource = Aws::IAM::Resource.new(client: client)
         summary_obj = resource.account_summary.summary_map
         summary_obj.to_json
+      rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
+      rescue Aws::Errors::MissingCredentialsError => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key."
+        }.to_json
       rescue => error
         p error
-        return {}.to_json
+        status 500
+        return {
+          Error: "Internal error"
+        }.to_json
       end
     end
 
