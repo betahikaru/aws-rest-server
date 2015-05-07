@@ -49,6 +49,56 @@ module AwsRestServer
           credentials: credentials
         )
       end
+
+      def get_user_policies(user_obj)
+        user_policies = []
+        user_name = user_obj.name
+
+        # Format
+        user_obj.policies.each do |policy|
+          user_policies.push({
+            UserName: policy.user_name,
+            Name: policy.name,
+            PolicyName: policy.policy_name,
+            PolicyDocument: policy.policy_document,
+          })
+        end
+        user_obj.attached_policies.each do |policy|
+          user_policies.push({
+            UserName: user_name,
+            PolicyName: policy.policy_name,
+            PolicyArn: policy.arn,
+          })
+        end
+
+        # Result
+        user_policies
+      end
+
+      def get_group_policies(group_obj)
+        group_policies = []
+        group_name = group_obj.name
+
+        # Format
+        group_obj.policies.each do |policy|
+          group_policies.push({
+            GroupName: policy.group_name,
+            PolicyName: policy.policy_name,
+            PolicyDocument: policy.policy_document,
+          })
+        end
+        group_obj.attached_policies.each do |policy|
+          group_policies.push({
+            GroupName: group_name,
+            PolicyName: policy.policy_name,
+            PolicyArn: policy.arn,
+          })
+        end
+
+        # Result
+        group_policies
+      end
+
     end
 
     post '/aws/setting' do
@@ -200,6 +250,70 @@ module AwsRestServer
       end
     end
 
+
+    get '/aws/iam/users/:user_name/policies' do
+      content_type :json
+
+      # '/aws/iam/users?test=1'
+      if params['test'] == "1" then
+        return {}.to_json # erb :'aws/iam/users/xxxx'
+      end
+
+      begin
+        # Request
+        client = aws_iam_client()
+        resource = Aws::IAM::Resource.new(client: client)
+        user_name = params[:user_name]
+        user_obj = resource.user(user_name)
+
+        # Format User Policies
+        user_policies = get_user_policies(user_obj)
+
+        # Format Group Policies
+        groups_policies =[]
+        user_obj.groups.each do |group|
+          group_name = group.name
+          group_obj = resource.group(group_name)
+          groups_policies.concat(get_group_policies(group_obj))
+        end
+
+        # Responce
+        {
+          UserName: user_obj.name,
+          UserPolicies: user_policies,
+          GroupPolicies: groups_policies,
+        }.to_json
+      rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
+      rescue Aws::Errors::MissingCredentialsError => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key."
+        }.to_json
+      rescue Aws::IAM::Errors::NoSuchEntity => nosuch_error
+        # Not found user specified by 'user_name'
+        p nosuch_error
+        status 404
+        return {
+          UserName: params[:user_name],
+          Error: nosuch_error.to_json
+        }.to_json
+      rescue => error
+        p error
+        status 500
+        return {
+          UserName: params[:user_name],
+          Error: "Internal error",
+          ErrorDetail: error.to_json
+        }.to_json
+      end
+    end
+
     get '/aws/iam/groups' do
       content_type :json
 
@@ -246,6 +360,59 @@ module AwsRestServer
       end
     end
 
+    get '/aws/iam/groups/:group_name/policies' do
+      content_type :json
+
+      if params['test'] == "1" then
+        return {}.to_json # erb :'aws/iam/groups/xxxx'
+      end
+
+      begin
+        # Request
+        client = aws_iam_client()
+        resource = Aws::IAM::Resource.new(client: client)
+        group_name = params[:group_name]
+        group_obj = resource.group(group_name)
+
+        # Format Group Policies
+        group_policies = get_group_policies(group_obj)
+
+        # Responce
+        {
+          GroupName: group_name,
+          GroupPolicies: group_policies,
+        }.to_json
+      rescue Aws::IAM::Errors::SignatureDoesNotMatch => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nInvalid API Key or Secret Access Key.\n(" + error.code + ")"
+        }.to_json
+      rescue Aws::Errors::MissingCredentialsError => error
+        p error
+        status 500
+        return {
+          Error: "Failed to authentication.\nNot set or set empty API Key or Secret Access Key."
+        }.to_json
+      rescue Aws::IAM::Errors::NoSuchEntity => nosuch_error
+        # Not found user specified by 'group_name'
+        p nosuch_error
+        status 404
+        return {
+          GroupName: params[:group_name],
+          Error: nosuch_error.to_json
+        }.to_json
+      rescue => error
+        p error
+        status 500
+        return {
+          GroupName: params[:group_name],
+          Error: "Internal error",
+          ErrorDetail: error.to_json
+        }.to_json
+      end
+    end
+
     get '/aws/iam/account_summary' do
       content_type :json
 
@@ -280,5 +447,11 @@ module AwsRestServer
       end
     end
 
+    not_found do
+      status 404
+      {
+        Error: "Not Found",
+      }.to_json
+    end
   end
 end
