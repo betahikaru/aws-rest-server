@@ -394,5 +394,11 @@ module AwsRestServer
       end
     end
 
+    not_found do
+      status 404
+      {
+        Error: "Not Found",
+      }.to_json
+    end
   end
 end
