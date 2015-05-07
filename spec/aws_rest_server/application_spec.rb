@@ -25,6 +25,7 @@ describe AwsRestServer::Application do
     /aws/iam/users/api_aws_iam/groups
     /aws/iam/users/api_aws_iam/policies
     /aws/iam/groups
+    /aws/iam/groups/aws_sdk_iam_full/policies
     /aws/iam/account_summary
     }.each do |uri|
     describe "Exists '#{uri}' page" do
@@ -79,6 +80,7 @@ describe AwsRestServer::Application do
   %w{
     /aws/iam/users/user_name_not_exists/groups
     /aws/iam/users/user_name_not_exists/policies
+    /aws/iam/groups/group_name_not_exists/policies
     }.each do |uri|
     describe "Not Exists '#{uri}' page" do
       describe "when Valid IAM User set" do
@@ -137,6 +139,7 @@ describe AwsRestServer::Application do
     /aws/iam/users?test=1
     /aws/iam/users/user_name/groups?test=1
     /aws/iam/groups?test=1
+    /aws/iam/groups/group_name/policies?test=1
     /aws/iam/account_summary?test=1
     }.each do |uri|
     describe "Exists '#{uri}' page" do
