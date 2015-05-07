@@ -138,6 +138,7 @@ describe AwsRestServer::Application do
     /aws/iam
     /aws/iam/users?test=1
     /aws/iam/users/user_name/groups?test=1
+    /aws/iam/users/user_name/policies?test=1
     /aws/iam/groups?test=1
     /aws/iam/groups/group_name/policies?test=1
     /aws/iam/account_summary?test=1
