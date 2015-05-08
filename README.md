@@ -98,6 +98,9 @@ curl -u user:changeme "http://localhost:9292/aws/iam/users"
 - List IAM Groups.
   - GET ```/aws/iam/groups```
   - GET ```/aws/iam/groups?test=1```
+- List IAM Policies of User and Group.
+  - GET ```/aws/iam/users/:user_name/policies```
+  - GET ```/aws/iam/groups/:group_name/policies```
 - IAM entity usage and IAM quotas.
   - GET ```/aws/iam/account_summary```
   - GET ```/aws/iam/account_summary?test=1```
